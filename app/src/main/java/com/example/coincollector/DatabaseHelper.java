@@ -11,9 +11,16 @@ import android.graphics.BitmapFactory;
 
 import androidx.annotation.Nullable;
 
+import com.github.mikephil.charting.data.Entry;
+
 import java.io.ByteArrayOutputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "coins.db";
@@ -26,6 +33,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_QUANTITY = "quantity";
     private static final String COLUMN_VALUE = "value";
     private static final String COLUMN_IMAGE = "image";
+    private static final String COLUMN_DATE_ADDED = "date_added";
 
     public DatabaseHelper(@Nullable Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -40,6 +48,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COLUMN_QUANTITY + " INTEGER, " +
                 COLUMN_VALUE + " REAL, " +
                 COLUMN_IMAGE + " BLOB, " +
+                COLUMN_DATE_ADDED + " TEXT DEFAULT CURRENT_DATE, " +
                 "UNIQUE (" + COLUMN_ID + "))";
         db.execSQL(createTable);
     }
@@ -85,7 +94,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    public void insertCoin(int year, String rarity, int quantity, double value, Bitmap image) {
+    public void insertCoin(int year, String rarity, int quantity, double value, Bitmap image, String dateAdded) {
         byte[] imageData = getBytesFromBitmap(image);
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -94,6 +103,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_QUANTITY, quantity);
         values.put(COLUMN_VALUE, value);
         values.put(COLUMN_IMAGE, imageData);
+        values.put(COLUMN_DATE_ADDED, dateAdded);
 
         db.insert(TABLE_NAME, null, values);
         db.close();
@@ -132,4 +142,40 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return coinList;
     }
+
+    /**
+     * Récupère les données pour le graphique, renvoyant une liste d'objets Entry pour MPAndroidChart.
+     */
+    public List<Entry> getChartData() {
+        List<Entry> chartData = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT date_added, SUM(value) AS total_value FROM coins GROUP BY date_added ORDER BY date_added";
+        Cursor cursor = db.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                String date = cursor.getString(cursor.getColumnIndex("date_added"));
+                float totalValue = cursor.getFloat(cursor.getColumnIndex("total_value"));
+                float dateValue = convertDateToFloat(date); // Assurez-vous d'implémenter cette méthode pour convertir la date en float
+                chartData.add(new Entry(dateValue, totalValue));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return chartData;
+    }
+
+    private float convertDateToFloat(String date) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        try {
+            Date dateObj = format.parse(date);
+            long referenceDate = format.parse("2000-01-01").getTime(); // Utilisez une date de base
+            return (dateObj.getTime() - referenceDate) / (24 * 60 * 60 * 1000); // Convertir en jours
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
 }

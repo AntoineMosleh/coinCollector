@@ -10,6 +10,10 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class AddCoinActivity extends AppCompatActivity {
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -47,6 +51,11 @@ public class AddCoinActivity extends AppCompatActivity {
         }
     }
 
+    private String getCurrentDate() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        return sdf.format(new Date());
+    }
+
     private void saveCoin() {
         EditText editTextYear = findViewById(R.id.editTextYear);
         EditText editTextRarity = findViewById(R.id.editTextRarity);
@@ -57,9 +66,9 @@ public class AddCoinActivity extends AppCompatActivity {
         String rarity = editTextRarity.getText().toString();
         int quantity = Integer.parseInt(editTextQuantity.getText().toString());
         double value = Double.parseDouble(editTextValue.getText().toString());
-
+        String currentDate = getCurrentDate();
         DatabaseHelper db = new DatabaseHelper(this);
-        db.insertCoin(year, rarity, quantity, value, imageBitmap);
+        db.insertCoin(year, rarity, quantity, value, imageBitmap, currentDate);
 
         // Définir le résultat OK pour notifier MainActivity que tout s'est bien passé
         Intent returnIntent = new Intent();

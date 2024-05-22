@@ -10,6 +10,7 @@ public class Coin {
     private int quantity;
     private double value;
     private byte[] image;
+    private String date_added;
 
     // Getters and Setters
     public int getId() {
@@ -58,6 +59,14 @@ public class Coin {
 
     public void setImage(byte[] image) {
         this.image = image;
+    }
+
+    public String getDate_added() {
+        return date_added;
+    }
+
+    public void setDate_added(String date_added) {
+        this.date_added = date_added;
     }
 
     public Bitmap getImageBitmap() {
