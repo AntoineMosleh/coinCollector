@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">coinCollector</string>
+    <string name="image_description">Image of a coin</string>
+</resources>
