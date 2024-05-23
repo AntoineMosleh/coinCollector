@@ -11,13 +11,20 @@ import android.graphics.BitmapFactory;
 
 import androidx.annotation.Nullable;
 
+import com.github.mikephil.charting.data.Entry;
+
 import java.io.ByteArrayOutputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "coins.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     private static final String TABLE_NAME = "coins";
     private static final String COLUMN_ID = "id";
@@ -40,7 +47,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COLUMN_QUANTITY + " INTEGER, " +
                 COLUMN_VALUE + " REAL, " +
                 COLUMN_IMAGE + " BLOB, " +
-                "UNIQUE (" + COLUMN_ID + "))";
+                "date_added TEXT DEFAULT (date('now'))" +
+                ")";
         db.execSQL(createTable);
     }
 
@@ -73,9 +81,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Mettez à jour votre schéma de base de données ici pour ajouter la colonne image
-        if (oldVersion < 2) {
-            db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COLUMN_IMAGE + " BLOB DEFAULT ''");
+        if (oldVersion < 3) {
+            // Ajouter la colonne sans valeur par défaut
+            db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN date_added TEXT");
+            // Mettre à jour les lignes existantes
+            db.execSQL("UPDATE " + TABLE_NAME + " SET date_added = date('now')");
         }
     }
 
@@ -85,7 +95,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    public void insertCoin(int year, String rarity, int quantity, double value, Bitmap image) {
+    public void insertCoin(int year, String rarity, int quantity, double value, Bitmap image, String dateAdded) {
         byte[] imageData = getBytesFromBitmap(image);
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -94,6 +104,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_QUANTITY, quantity);
         values.put(COLUMN_VALUE, value);
         values.put(COLUMN_IMAGE, imageData);
+        values.put("date_added", dateAdded);  // Ajouter la date manuellement
 
         db.insert(TABLE_NAME, null, values);
         db.close();
@@ -132,4 +143,38 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return coinList;
     }
+
+    public List<Entry> getChartData() {
+        List<Entry> entries = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        // La requête SQL pour récupérer la date et la somme des valeurs pour chaque date
+        String query = "SELECT date_added, SUM(value) AS total_value FROM " + TABLE_NAME + " GROUP BY date_added ORDER BY date_added";
+        Cursor cursor = db.rawQuery(query, null);
+        if (cursor.moveToFirst()) {
+            do {
+                String dateStr = cursor.getString(cursor.getColumnIndex("date_added"));
+                float totalValue = cursor.getFloat(cursor.getColumnIndex("total_value"));
+                long dateMillis = convertDateToMillis(dateStr); // Convertir la date en millisecondes
+                entries.add(new Entry(dateMillis, totalValue)); // Utilisez le temps en millisecondes comme valeur X
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return entries;
+    }
+
+    private long convertDateToMillis(String dateStr) {
+        if (dateStr == null) {
+            return 0; // Ou une autre valeur appropriée pour indiquer une date invalide
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        try {
+            Date date = sdf.parse(dateStr);
+            return date != null ? date.getTime() : 0;
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
 }

@@ -52,14 +52,16 @@ public class AddCoinActivity extends AppCompatActivity {
         EditText editTextRarity = findViewById(R.id.editTextRarity);
         EditText editTextQuantity = findViewById(R.id.editTextQuantity);
         EditText editTextValue = findViewById(R.id.editTextValue);
+        EditText editDateAdded = findViewById(R.id.editDateAdded);
 
         int year = Integer.parseInt(editTextYear.getText().toString());
         String rarity = editTextRarity.getText().toString();
         int quantity = Integer.parseInt(editTextQuantity.getText().toString());
         double value = Double.parseDouble(editTextValue.getText().toString());
+        String dateAdded = editDateAdded.getText().toString();
 
         DatabaseHelper db = new DatabaseHelper(this);
-        db.insertCoin(year, rarity, quantity, value, imageBitmap);
+        db.insertCoin(year, rarity, quantity, value, imageBitmap,dateAdded);
 
         // Définir le résultat OK pour notifier MainActivity que tout s'est bien passé
         Intent returnIntent = new Intent();
