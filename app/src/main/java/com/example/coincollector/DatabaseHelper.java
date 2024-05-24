@@ -82,9 +82,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion < 3) {
-            // Ajouter la colonne sans valeur par défaut
             db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN date_added TEXT");
-            // Mettre à jour les lignes existantes
             db.execSQL("UPDATE " + TABLE_NAME + " SET date_added = date('now')");
         }
     }
@@ -104,7 +102,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_QUANTITY, quantity);
         values.put(COLUMN_VALUE, value);
         values.put(COLUMN_IMAGE, imageData);
-        values.put("date_added", dateAdded);  // Ajouter la date manuellement
+        values.put("date_added", dateAdded);
 
         db.insert(TABLE_NAME, null, values);
         db.close();
@@ -112,7 +110,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public void deleteAllCoins() {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("DELETE FROM " + TABLE_NAME); // Supprime toutes les données de la table
+        db.execSQL("DELETE FROM " + TABLE_NAME);
         db.close();
     }
 
@@ -131,7 +129,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 coin.setValue(cursor.getDouble(cursor.getColumnIndex(COLUMN_VALUE)));
                 byte[] imageBytes = cursor.getBlob(cursor.getColumnIndex(COLUMN_IMAGE));
                 if (imageBytes != null) {
-                    //Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
                     coin.setImage(imageBytes);
                 }
 
@@ -147,15 +144,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public List<Entry> getChartData() {
         List<Entry> entries = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        // La requête SQL pour récupérer la date et la somme des valeurs pour chaque date
+
         String query = "SELECT date_added, SUM(value) AS total_value FROM " + TABLE_NAME + " GROUP BY date_added ORDER BY date_added";
         Cursor cursor = db.rawQuery(query, null);
+
+        float cumulativeTotal = 0;
         if (cursor.moveToFirst()) {
             do {
                 String dateStr = cursor.getString(cursor.getColumnIndex("date_added"));
-                float totalValue = cursor.getFloat(cursor.getColumnIndex("total_value"));
-                long dateMillis = convertDateToMillis(dateStr); // Convertir la date en millisecondes
-                entries.add(new Entry(dateMillis, totalValue)); // Utilisez le temps en millisecondes comme valeur X
+                float dailyTotal = cursor.getFloat(cursor.getColumnIndex("total_value"));
+                cumulativeTotal += dailyTotal; // Procède au cumul
+                long dateMillis = convertDateToMillis(dateStr);
+                entries.add(new Entry(dateMillis, cumulativeTotal));
             } while (cursor.moveToNext());
         }
         cursor.close();
@@ -165,16 +165,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private long convertDateToMillis(String dateStr) {
         if (dateStr == null) {
-            return 0; // Ou une autre valeur appropriée pour indiquer une date invalide
+            return 0;
         }
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         try {
             Date date = sdf.parse(dateStr);
-            return date != null ? date.getTime() : 0;
+            return date.getTime();
         } catch (ParseException e) {
             e.printStackTrace();
             return 0;
         }
     }
+
+
 
 }

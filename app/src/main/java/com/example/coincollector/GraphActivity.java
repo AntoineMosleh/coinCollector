@@ -18,11 +18,11 @@ public class GraphActivity extends AppCompatActivity {
 
         LineChart chart = findViewById(R.id.chart);
         DatabaseHelper db = new DatabaseHelper(this);
-        List<Entry> entries = db.getChartData();  // Assurez-vous que cette méthode renvoie les données appropriées
+        List<Entry> entries = db.getChartData();
 
         LineDataSet dataSet = new LineDataSet(entries, "Valeur Totale des Pièces");
         LineData lineData = new LineData(dataSet);
         chart.setData(lineData);
-        chart.invalidate();  // Rafraîchit le graphique pour montrer les données
+        chart.invalidate();
     }
 }

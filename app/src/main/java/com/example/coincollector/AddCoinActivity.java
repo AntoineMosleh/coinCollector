@@ -33,7 +33,7 @@ public class AddCoinActivity extends AppCompatActivity {
             }
         });
 
-        Button btnSave = findViewById(R.id.btnSave); // Assurez-vous d'ajouter ce bouton dans votre XML
+        Button btnSave = findViewById(R.id.btnSave);
         btnSave.setOnClickListener(v -> saveCoin());
     }
 
@@ -63,7 +63,6 @@ public class AddCoinActivity extends AppCompatActivity {
         DatabaseHelper db = new DatabaseHelper(this);
         db.insertCoin(year, rarity, quantity, value, imageBitmap,dateAdded);
 
-        // Définir le résultat OK pour notifier MainActivity que tout s'est bien passé
         Intent returnIntent = new Intent();
         setResult(RESULT_OK, returnIntent);
 

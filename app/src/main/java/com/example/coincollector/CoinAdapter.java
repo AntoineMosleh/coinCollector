@@ -29,15 +29,15 @@ public class CoinAdapter extends ArrayAdapter<Coin> {
 
         Coin coin = getItem(position);
 
-        // Mise en forme de l'affichage des informations
+
         textYearRarity.setText("Year: " + coin.getYear() + ", Rarity: " + coin.getRarity());
         textQuantityValue.setText("Quantity: " + coin.getQuantity() + ", Value: $" + coin.getValue());
 
-        Bitmap bitmap = coin.getImageBitmap();  // Utilisez la méthode getImageBitmap pour obtenir le Bitmap
+        Bitmap bitmap = coin.getImageBitmap();
         if (bitmap != null) {
-            imageView.setImageBitmap(bitmap);  // Afficher le Bitmap directement
+            imageView.setImageBitmap(bitmap);
         } else {
-            imageView.setImageResource(R.drawable.deuxeurocoin);  // Image par défaut si nécessaire
+            imageView.setImageResource(R.drawable.deuxeurocoin);
         }
 
         return convertView;

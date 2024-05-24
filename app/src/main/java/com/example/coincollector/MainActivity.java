@@ -80,25 +80,7 @@ public class MainActivity extends AppCompatActivity {
 
         db = new DatabaseHelper(this);
         listView = findViewById(R.id.listView);
-        //db.deleteAllCoins();
-        String imageUrl = "https://img-3.journaldesfemmes.fr/a5LFTZ3qU2fUVOmwIVKDJawBJXA=/1500x/smart/83c0e4f55dd846dea2be0be27e715dcd/ccmcms-jdf/10662446.jpg";
-        downloadAndInsertCoin(1234, "Rare", 312, 45, imageUrl,"2024-05-24");
 
-
-        //if (db.getAllCoins().isEmpty()) {
-        //    String imageUrl = "https://www.pieces-et-monnaies.com/cdn/shop/files/25ctlindauerdos.jpg?v=1691142845";
-        //    downloadAndInsertCoin(1234, "Rare", 312, 45, imageUrl);
-        //    String imageUrl2 = "https://www.pieces-et-monnaies.com/cdn/shop/files/guirauddos.png?v=1695805422";
-        //    downloadAndInsertCoin(1574, "Commun", 56, 12, imageUrl2);
-        //    String imageUrl3 = "https://www.pieces-et-monnaies.com/cdn/shop/files/cochetdos.png?v=1695807302";
-        //    downloadAndInsertCoin(2001, "Rare", 71, 43, imageUrl3);
-        //    String imageUrl4 = "https://www.pieces-et-monnaies.com/cdn/shop/files/guirauddos.png?v=1695805422";
-        //    downloadAndInsertCoin(1092, "Peu rare", 132, 76, imageUrl4);
-        //    String imageUrl5 = "https://www.pieces-et-monnaies.com/cdn/shop/files/cochetdos.png?v=1695807302";
-        //    downloadAndInsertCoin(1234, "Commun", 1231, 4.5, imageUrl5);
-        //    String imageUrl6 = "https://www.pieces-et-monnaies.com/cdn/shop/files/1_635a5b40-2e35-43cd-a79f-6adc03ca0357.png?v=1712050888";
-        //    downloadAndInsertCoin(1783, "Très rare", 12, 300, imageUrl6);
-        //}
         updateListView();
 
     }
